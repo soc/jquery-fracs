@@ -64,6 +64,8 @@ function Outline(canvas, options, viewport) {
     var currentContentRect;
     var currentViewportRect;
     var currentScale;
+    var currentWidthScale;
+    var currentHeightScale;
     var focusWidth;
     var focusHeight;
 
@@ -131,16 +133,18 @@ function Outline(canvas, options, viewport) {
 
         currentContentRect = Rect.ofContent(viewport);
         currentViewportRect = Rect.ofViewport(viewport, true);
+        currentWidthScale = width / currentContentRect.width;
+        currentHeightScale = height / currentContentRect.height;
         currentScale = Math.min(width / currentContentRect.width, height / currentContentRect.height);
 
         if (settings.crop) {
-            $canvas.attr('width', currentContentRect.width * currentScale).attr('height', currentContentRect.height * currentScale);
+            $canvas.attr('width', currentContentRect.width * currentWidthScale).attr('height', currentContentRect.height * currentHeightScale);
         }
 
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.clearRect(0, 0, $canvas.width(), $canvas.height());
 
-        context.scale(currentScale, currentScale);
+        context.scale(currentWidthScale, currentHeightScale);
         applyStyles();
         drawViewport();
     }
@@ -148,8 +152,8 @@ function Outline(canvas, options, viewport) {
     function onDrag(event) {
 
         var r = Rect.ofElement(canvas);
-        var x = (event.pageX - r.left) / currentScale - currentViewportRect.width * focusWidth;
-        var y = (event.pageY - r.top) / currentScale - currentViewportRect.height * focusHeight;
+        var x = (event.pageX - r.left) / currentWidthScale - currentViewportRect.width * focusWidth;
+        var y = (event.pageY - r.top) / currentHeightScale - currentViewportRect.height * focusHeight;
 
         viewportObj.scrollTo(x, y, settings.duration);
     }
@@ -170,8 +174,8 @@ function Outline(canvas, options, viewport) {
         var r;
         if (settings.autoFocus) {
             r = Rect.ofElement(canvas);
-            focusWidth = (((event.pageX - r.left) / currentScale) - currentViewportRect.left) / currentViewportRect.width;
-            focusHeight = (((event.pageY - r.top) / currentScale) - currentViewportRect.top) / currentViewportRect.height;
+            focusWidth = (((event.pageX - r.left) / currentWidthScale) - currentViewportRect.left) / currentViewportRect.width;
+            focusHeight = (((event.pageY - r.top) / currentHeightScale) - currentViewportRect.top) / currentViewportRect.height;
         }
         if (!settings.autoFocus || focusWidth < 0 || focusWidth > 1 || focusHeight < 0 || focusHeight > 1) {
             focusWidth = settings.focusWidth;
